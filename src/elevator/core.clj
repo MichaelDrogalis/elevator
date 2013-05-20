@@ -15,17 +15,13 @@
   (fn [{:keys [floor direction]} dst-floor location]
     [(downstream? direction floor dst-floor) location]))
 
-(defmethod discretize? [true :outside]
-  [& _] :downstream)
+(defmethod discretize? [true :outside] [& _] :downstream)
 
-(defmethod discretize? [false :outside]
-  [& _] :upstream)
+(defmethod discretize? [false :outside] [& _] :upstream)
 
-(defmethod discretize? [true :inside]
-  [& _] :downstream)
+(defmethod discretize? [true :inside] [& _] :downstream)
 
-(defmethod discretize? [false :inside]
-  [& _] :rejected)
+(defmethod discretize? [false :inside] [& _] :rejected)
 
 (defmulti discretize
   (fn [{:keys [direction]} _]
@@ -37,13 +33,16 @@
      (conj tasks {:floor next-floor :task :proceed}))
    [] floor-seq))
 
+(defn open-doors-task [floor]
+  {:floor floor :task :open-doors})
+
 (defmethod discretize :up
   [{:keys [floor]} dst-floor]
   (conj (proceeding-tasks (range (inc floor) dst-floor))
-        {:floor dst-floor :task :open-doors}))
+        (open-doors-task dst-floor)))
 
 (defmethod discretize :down
   [{:keys [floor]} dst-floor]
   (conj (proceeding-tasks (reverse (range (inc dst-floor) floor)))
-        {:floor dst-floor :task :open-doors}))
+        (open-doors-task dst-floor)))
 
