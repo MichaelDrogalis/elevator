@@ -18,3 +18,7 @@
   [& _]
   :downstream)
 
+(defmethod discretize? [false :inside]
+  [& _]
+  :rejected)
+
