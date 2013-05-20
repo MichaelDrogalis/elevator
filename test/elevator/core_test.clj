@@ -27,18 +27,14 @@
 (deftest discretizes-downward-microtasks
   (are [dst-floor tasks]
     (= tasks (discretize {:floor 5 :direction :down} dst-floor))
-    4 [{:floor 4 :task :open-doors}]
-    3 [{:floor 4 :task :proceed} {:floor 3 :task :open-doors}]
-    2 [{:floor 4 :task :proceed}
-       {:floor 3 :task :proceed}
-       {:floor 2 :task :open-doors}]))
+    4 {4 :open-doors}
+    3 {4 :proceed 3 :open-doors}
+    2 {4 :proceed 3 :proceed 2 :open-doors}))
 
 (deftest discretizes-upward-microtasks
   (are [dst-floor tasks]
     (= tasks (discretize {:floor 5 :direction :up} dst-floor))
-    6 [{:floor 6 :task :open-doors}]
-    7 [{:floor 6 :task :proceed} {:floor 7 :task :open-doors}]
-    8 [{:floor 6 :task :proceed}
-       {:floor 7 :task :proceed}
-       {:floor 8 :task :open-doors}]))
+    6 {6 :open-doors}
+    7 {6 :proceed 7 :open-doors}
+    8 {6 :proceed 7 :proceed 8 :open-doors}))
 

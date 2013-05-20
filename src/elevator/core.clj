@@ -30,19 +30,19 @@
 (defn proceeding-tasks [floor-seq]
   (reduce
    (fn [tasks next-floor]
-     (conj tasks {:floor next-floor :task :proceed}))
-   [] floor-seq))
+     (assoc tasks next-floor :proceed))
+   {} floor-seq))
 
 (defn open-doors-task [floor]
-  {:floor floor :task :open-doors})
+  {floor :open-doors})
 
 (defmethod discretize :up
   [{:keys [floor]} dst-floor]
-  (conj (proceeding-tasks (range (inc floor) dst-floor))
-        (open-doors-task dst-floor)))
+  (merge (proceeding-tasks (range (inc floor) dst-floor))
+         (open-doors-task dst-floor)))
 
 (defmethod discretize :down
   [{:keys [floor]} dst-floor]
-  (conj (proceeding-tasks (reverse (range (inc dst-floor) floor)))
-        (open-doors-task dst-floor)))
+  (merge (proceeding-tasks (reverse (range (inc dst-floor) floor)))
+         (open-doors-task dst-floor)))
 
