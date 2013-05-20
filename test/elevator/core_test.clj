@@ -5,32 +5,22 @@
 (def discretize?> (partial discretize? {:floor 4 :direction :down}))
 
 (deftest downstream-outside-requests
-  (are [floor control]
-       (= :downstream (discretize?> floor control))
-       4 :outside
-       3 :outside
-       2 :outside
-       1 :outside))
+  (are [floor]
+       (= :downstream (discretize?> floor :outside))
+       4 3 2 1))
 
 (deftest downstream-inside-requests
-  (are [floor control]
-       (= :downstream (discretize?> floor control))
-       4 :inside
-       3 :inside
-       2 :inside
-       1 :inside))
+  (are [floor]
+       (= :downstream (discretize?> floor :inside))
+       4 3 2 1))
 
 (deftest upstream-outside-requests
-  (are [floor control]
-       (= :upstream (discretize?> floor control))
-       5 :outside
-       6 :outside
-       7 :outside))
+  (are [floor]
+       (= :upstream (discretize?> floor :outside))
+       5 6 7))
 
 (deftest rejected-inside-requests
-  (are [floor control]
-       (= :rejected (discretize?> floor control))
-       5 :inside
-       6 :inside
-       7 :inside))
+  (are [floor]
+       (= :rejected (discretize?> floor :inside))
+       5 6 7))
 
