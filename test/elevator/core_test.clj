@@ -24,7 +24,7 @@
     (= :rejected (discretize?> floor :inside))
     5 6 7))
 
-(deftest discretizes-microtasks
+(deftest discretizes-downward-microtasks
   (are [dst-floor tasks]
     (= tasks (discretize {:floor 5 :direction :down} dst-floor))
     4 [{:floor 4 :task :open-doors}]
@@ -32,4 +32,13 @@
     2 [{:floor 4 :task :proceed}
        {:floor 3 :task :proceed}
        {:floor 2 :task :open-doors}]))
+
+(deftest discretizes-upward-microtasks
+  (are [dst-floor tasks]
+    (= tasks (discretize {:floor 5 :direction :up} dst-floor))
+    6 [{:floor 6 :task :open-doors}]
+    7 [{:floor 6 :task :proceed} {:floor 7 :task :open-doors}]
+    8 [{:floor 6 :task :proceed}
+       {:floor 7 :task :proceed}
+       {:floor 8 :task :open-doors}]))
 

@@ -37,6 +37,11 @@
      (conj tasks {:floor next-floor :task :proceed}))
    [] floor-seq))
 
+(defmethod discretize :up
+  [{:keys [floor]} dst-floor]
+  (conj (proceeding-tasks (range (inc floor) dst-floor))
+        {:floor dst-floor :task :open-doors}))
+
 (defmethod discretize :down
   [{:keys [floor]} dst-floor]
   (conj (proceeding-tasks (reverse (range (inc dst-floor) floor)))
