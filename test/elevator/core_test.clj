@@ -46,3 +46,7 @@
     :open-doors :open-doors :open-doors
     :proceed    :proceed    :proceed))
 
+(deftest safely-merges-task-seqs
+  (is (= {4 :proceed 3 :proceed 2 :open-doors 1 :open-doors}
+         (merge-task-seq {4 :proceed 3 :proceed 2 :proceed 1 :open-doors}
+                         {4 :proceed 3 :proceed 2 :open-doors}))))

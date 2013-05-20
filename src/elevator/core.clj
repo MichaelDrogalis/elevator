@@ -54,7 +54,5 @@
     :proceed))
 
 (defn merge-task-seq [microtasks new-tasks]
-;  (merge-with resolve-task-conflicts microtasks new-tasks)
-  )
-
+  (merge-with resolve-task-conflicts microtasks new-tasks))
 
