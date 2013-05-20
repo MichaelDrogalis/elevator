@@ -2,6 +2,8 @@
 
 (def upstream-tasks (ref #{}))
 
+(def microtasks (ref {}))
+
 (defmulti downstream?
   (fn [direction _ _] direction))
 
@@ -62,4 +64,15 @@
   (let [floors (map :floor tasks)
         microtasks (map (partial discretize elevator) floors)]
     (apply merge-task-seq {} microtasks)))
+
+(defn swap-direction [direction]
+  ({:up :down :down :up} direction))
+
+(defn consume-upstream-tasks [elevator microtasks upstream-tasks]
+  (when (empty? @microtasks)
+    (dosync
+     (alter elevator assoc :direction (swap-direction (:direction @elevator)))
+     (let [new-microtasks (consolidate-tasks @elevator @upstream-tasks)]
+       (ref-set microtasks new-microtasks)
+       (ref-set upstream-tasks #{})))))
 
