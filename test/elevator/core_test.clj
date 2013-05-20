@@ -63,18 +63,18 @@
 
 (deftest upstream-tasks-not-consumed
   (let [elevator (ref {:floor 5 :direction :down})
-        microtasks (ref {1 :open-doors})
+        microtasks-ref (ref {1 :open-doors})
         upstream-tasks (ref #{{:floor 6}})]
-    (consume-upstream-tasks elevator microtasks upstream-tasks)
+    (consume-upstream-tasks elevator microtasks-ref @microtasks-ref upstream-tasks)
     (is (= #{{:floor 6}} @upstream-tasks))
     (is (= :down (:direction @elevator)))))
 
 (deftest upstream-tasks-consumed
   (let [elevator (ref {:floor 5 :direction :down})
-        microtasks (ref {})
+        microtasks-ref (ref {})
         upstream-tasks (ref #{{:floor 6}})]
-    (consume-upstream-tasks elevator microtasks upstream-tasks)
+    (consume-upstream-tasks elevator microtasks-ref @microtasks-ref upstream-tasks)
     (is (= #{} @upstream-tasks))
-    (is (= {6 :open-doors} @microtasks))
+    (is (= {6 :open-doors} @microtasks-ref))
     (is (= :up (:direction @elevator)))))
 

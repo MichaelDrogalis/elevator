@@ -59,28 +59,28 @@
     :open-doors
     :proceed))
 
-(defn merge-task-seq [microtasks & new-tasks]
-  (apply merge-with resolve-task-conflicts microtasks new-tasks))
+(defn merge-task-seq [microtasks-coll & new-tasks]
+  (apply merge-with resolve-task-conflicts microtasks-coll new-tasks))
 
 (defn consolidate-tasks [elevator tasks]
   (let [floors (map :floor tasks)
-        microtasks (map (partial discretize elevator) floors)]
-    (apply merge-task-seq {} microtasks)))
+        microtask-seq (map (partial discretize elevator) floors)]
+    (apply merge-task-seq {} microtask-seq)))
 
 (defn swap-direction [direction]
   ({:up :down :down :up} direction))
 
-(defn consume-upstream-tasks [elevator microtasks upstream-tasks]
+(defn consume-upstream-tasks [elevator microtasks-ref microtasks-coll upstream-tasks]
   (dosync
-   (when (empty? @microtasks)
+   (when (and (empty? microtasks-coll) (not (empty? @upstream-tasks)))
      (alter elevator assoc :direction (swap-direction (:direction @elevator)))
      (let [new-microtasks (consolidate-tasks @elevator @upstream-tasks)]
-       (ref-set microtasks new-microtasks)
+       (ref-set microtasks-ref new-microtasks)
        (ref-set upstream-tasks #{})))))
 
 (add-watch microtasks :upstream-consumer
            (fn [_ microtasks-ref _ microtask-coll]
-             (consume-upstream-tasks elevator microtasks upstream-tasks)))
+             (consume-upstream-tasks elevator microtask-coll upstream-tasks)))
 
 (defn submit-request [{:keys [floor location] :as request}]
   (dosync
