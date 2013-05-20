@@ -36,13 +36,15 @@
 (defn open-doors-task [floor]
   {floor :open-doors})
 
+(defn task-seq [floor-seq dst-floor]
+  (merge (proceeding-tasks floor-seq)
+         (open-doors-task dst-floor)))
+
 (defmethod discretize :up
   [{:keys [floor]} dst-floor]
-  (merge (proceeding-tasks (range (inc floor) dst-floor))
-         (open-doors-task dst-floor)))
+  (task-seq (range (inc floor) dst-floor) dst-floor))
 
 (defmethod discretize :down
   [{:keys [floor]} dst-floor]
-  (merge (proceeding-tasks (reverse (range (inc dst-floor) floor)))
-         (open-doors-task dst-floor)))
+  (task-seq (reverse (range (inc dst-floor) floor)) dst-floor))
 
