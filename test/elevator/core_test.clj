@@ -38,3 +38,11 @@
     7 {6 :proceed 7 :open-doors}
     8 {6 :proceed 7 :proceed 8 :open-doors}))
 
+(deftest conflicts-resolved-safely
+  (are [scheduled candidate expectations]
+    (= expectations (resolve-task-conflicts scheduled candidate))
+    :proceed    :open-doors :open-doors  
+    :open-doors :proceed    :open-doors  
+    :open-doors :open-doors :open-doors  
+    :proceed    :proceed    :proceed))
+

@@ -48,3 +48,13 @@
   [{:keys [floor]} dst-floor]
   (task-seq (reverse (range (inc dst-floor) floor)) dst-floor))
 
+(defn resolve-task-conflicts [scheduled-task candidate-task]
+  (if (some (partial = :open-doors) [scheduled-task candidate-task])
+    :open-doors
+    :proceed))
+
+(defn merge-task-seq [microtasks new-tasks]
+;  (merge-with resolve-task-conflicts microtasks new-tasks)
+  )
+
+
