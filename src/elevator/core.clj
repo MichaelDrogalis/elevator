@@ -1,5 +1,7 @@
 (ns elevator.core)
 
+(def upstream-tasks (ref #{}))
+
 (defmulti downstream?
   (fn [direction _ _] direction))
 
@@ -53,6 +55,6 @@
     :open-doors
     :proceed))
 
-(defn merge-task-seq [microtasks new-tasks]
-  (merge-with resolve-task-conflicts microtasks new-tasks))
+(defn merge-task-seq [microtasks & new-tasks]
+  (apply merge-with resolve-task-conflicts microtasks new-tasks))
 
