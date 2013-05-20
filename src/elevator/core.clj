@@ -1,8 +1,10 @@
 (ns elevator.core)
 
-(def upstream-tasks (ref #{}))
+(def elevator (ref {:floor 10 :direction :down}))
 
 (def microtasks (ref {}))
+
+(def upstream-tasks (ref #{}))
 
 (defmulti downstream?
   (fn [direction _ _] direction))
@@ -69,10 +71,22 @@
   ({:up :down :down :up} direction))
 
 (defn consume-upstream-tasks [elevator microtasks upstream-tasks]
-  (when (empty? @microtasks)
-    (dosync
+  (dosync
+   (when (empty? @microtasks)
      (alter elevator assoc :direction (swap-direction (:direction @elevator)))
      (let [new-microtasks (consolidate-tasks @elevator @upstream-tasks)]
        (ref-set microtasks new-microtasks)
        (ref-set upstream-tasks #{})))))
+
+(add-watch microtasks :upstream-consumer
+           (fn [_ microtasks-ref _ microtask-coll]
+             (consume-upstream-tasks elevator microtasks upstream-tasks)))
+
+(defn submit-request [{:keys [floor location] :as request}]
+  (dosync
+   (let [result (discretize? @elevator floor location)]
+     (cond (= :downstream result) (ref-set microtasks (merge-task-seq @microtasks (discretize @elevator floor)))
+           (= :upstream result) (alter upstream-tasks conj request)
+           (= :rejected result) (println "Request rejected.")
+           :else (println "Unexpected result from discretize?:" result)))))
 
