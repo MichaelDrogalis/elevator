@@ -58,3 +58,8 @@
 (defn merge-task-seq [microtasks & new-tasks]
   (apply merge-with resolve-task-conflicts microtasks new-tasks))
 
+(defn consolidate-tasks [elevator tasks]
+  (let [floors (map :floor tasks)
+        microtasks (map (partial discretize elevator) floors)]
+    (apply merge-task-seq {} microtasks)))
+

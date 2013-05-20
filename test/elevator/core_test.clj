@@ -50,3 +50,9 @@
   (is (= {4 :proceed 3 :proceed 2 :open-doors 1 :open-doors}
          (merge-task-seq {4 :proceed 3 :proceed 2 :proceed 1 :open-doors}
                          {4 :proceed 3 :proceed 2 :open-doors}))))
+
+(deftest discretizes-and-merges-upstream-tasks
+  (is (= {4 :proceed 3 :open-doors 2 :open-doors}
+         (consolidate-tasks {:floor 5 :direction :down}
+                            #{{:floor 3} {:floor 2}}))))
+
