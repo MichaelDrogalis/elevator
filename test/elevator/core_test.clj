@@ -41,8 +41,8 @@
 (deftest conflicts-resolved-safely
   (are [scheduled candidate expectations]
     (= expectations (resolve-task-conflicts scheduled candidate))
-    :proceed    :open-doors :open-doors  
-    :open-doors :proceed    :open-doors  
-    :open-doors :open-doors :open-doors  
+    :proceed    :open-doors :open-doors
+    :open-doors :proceed    :open-doors
+    :open-doors :open-doors :open-doors
     :proceed    :proceed    :proceed))
 
