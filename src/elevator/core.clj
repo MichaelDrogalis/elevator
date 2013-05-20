@@ -27,3 +27,18 @@
 (defmethod discretize? [false :inside]
   [& _] :rejected)
 
+(defmulti discretize
+  (fn [{:keys [direction]} _]
+    direction))
+
+(defn proceeding-tasks [floor-seq]
+  (reduce
+   (fn [tasks next-floor]
+     (conj tasks {:floor next-floor :task :proceed}))
+   [] floor-seq))
+
+(defmethod discretize :down
+  [{:keys [floor]} dst-floor]
+  (conj (proceeding-tasks (reverse (range (inc dst-floor) floor)))
+        {:floor dst-floor :task :open-doors}))
+

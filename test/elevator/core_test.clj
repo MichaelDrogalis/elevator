@@ -24,3 +24,13 @@
        (= :rejected (discretize?> floor :inside))
        5 6 7))
 
+(deftest discretizes-microtasks
+  (is (= [{:floor 4 :task :open-doors}]
+         (discretize {:floor 5 :direction :down} 4)))
+  (is (= [{:floor 4 :task :proceed} {:floor 3 :task :open-doors}]
+         (discretize {:floor 5 :direction :down} 3)))
+  (is (= [{:floor 4 :task :proceed}
+          {:floor 3 :task :proceed}
+          {:floor 2 :task :open-doors}]
+         (discretize {:floor 5 :direction :down} 2))))
+
