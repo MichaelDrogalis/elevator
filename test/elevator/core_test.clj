@@ -78,3 +78,9 @@
     (is (= {6 :open-doors} @microtasks-ref))
     (is (= :up (:direction @elevator)))))
 
+(deftest finds-new-microtasks
+  (are [old new expectations] (= expectations (new-microtasks old new))
+       {} {} {}
+       {} {1 :open-doors} {1 :open-doors}
+       {1 :open-doors} {1 :open-doors 2 :proceed} {2 :proceed}))
+

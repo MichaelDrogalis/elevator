@@ -1,4 +1,5 @@
-(ns elevator.core)
+(ns elevator.core
+  (:require [clojure.data :refer [diff]]))
 
 (def elevator (ref {:floor 10 :direction :down}))
 
@@ -81,6 +82,9 @@
 (add-watch microtasks :upstream-consumer
            (fn [_ microtasks-ref _ microtask-coll]
              (consume-upstream-tasks elevator microtask-coll upstream-tasks)))
+
+(defn new-microtasks [old-tasks new-tasks]
+  (or (second (diff old-tasks new-tasks)) {}))
 
 (defn submit-request [{:keys [floor location] :as request}]
   (dosync
