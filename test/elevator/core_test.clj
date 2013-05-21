@@ -6,22 +6,22 @@
 
 (deftest downstream-outside-requests
   (are [floor]
-    (= :downstream (discretize?> floor :outside))
+    (= :downstream (discretize?> true floor :outside))
     4 3 2 1))
 
 (deftest downstream-inside-requests
   (are [floor]
-    (= :downstream (discretize?> floor :inside))
+    (= :downstream (discretize?> true floor :inside))
     4 3 2 1))
 
 (deftest upstream-outside-requests
   (are [floor]
-    (= :upstream (discretize?> floor :outside))
+    (= :upstream (discretize?> true floor :outside))
     5 6 7))
 
 (deftest rejected-inside-requests
   (are [floor]
-    (= :rejected (discretize?> floor :inside))
+    (= :rejected (discretize?> true floor :inside))
     5 6 7))
 
 (deftest discretizes-downward-microtasks

@@ -55,16 +55,24 @@
   (>= (- src-floor dst-floor) 0))
 
 (defmulti discretize?
-  (fn [{:keys [floor direction]} dst-floor location]
-    [(downstream? direction floor dst-floor) location]))
+  (fn [{:keys [floor direction]} downstream-work? dst-floor location]
+    [(downstream? direction floor dst-floor) downstream-work? location]))
 
-(defmethod discretize? [true :outside] [& _] :downstream)
+(defmethod discretize? [true true :outside] [& _] :downstream)
 
-(defmethod discretize? [false :outside] [& _] :upstream)
+(defmethod discretize? [true true :inside] [& _] :downstream)
 
-(defmethod discretize? [true :inside] [& _] :downstream)
+(defmethod discretize? [true false :inside] [& _] :downstream)
 
-(defmethod discretize? [false :inside] [& _] :rejected)
+(defmethod discretize? [false true :outside] [& _] :upstream)
+
+(defmethod discretize? [true false :outside] [& _] :downstream)
+
+(defmethod discretize? [false false :inside] [& _] :upstream)
+
+(defmethod discretize? [false false :outside] [& _] :upstream)
+
+(defmethod discretize? [false true :inside] [& _] :rejected)
 
 (defmulti discretize
   (fn [{:keys [direction]} _]
@@ -145,9 +153,11 @@
 
 (defn submit-request [{:keys [floor location] :as request}]
   (dosync
-   (let [result (discretize? @elevator floor location)]
+   (let [result (discretize? @elevator (not (empty? @microtasks)) floor location)]
      (cond (= :downstream result) (ref-set microtasks (merge-task-seq @microtasks (discretize @elevator floor)))
            (= :upstream result) (alter upstream-tasks conj request)
            (= :rejected result) (println "Request rejected.")
            :else (println "Unexpected result from discretize?:" result)))))
+
+(submit-request {:floor 7 :location :outside})
 
