@@ -119,6 +119,12 @@
            (fn [_ microtasks-ref _ microtask-coll]
              (consume-upstream-tasks elevator microtasks-ref microtask-coll upstream-tasks)))
 
+(add-watch upstream-tasks :upstream-consumer
+           (fn [_ _ _ upstream-coll]
+             (dosync
+              (when (empty? @microtasks)
+                (consume-upstream-tasks elevator microtasks @microtasks upstream-tasks)))))
+
 (defn new-microtasks [old-tasks new-tasks]
   (or (second (diff old-tasks new-tasks)) {}))
 
