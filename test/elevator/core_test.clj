@@ -87,14 +87,22 @@
 (deftest sorting-microtasks-ascending
   (are [unsorted sorted] (= sorted (sort-microtasks :up unsorted))
        [] []
-       [{:floor 1 :task :proceed}] [{:floor 1 :task :proceed}]
-       [{:floor 2 :task :open-doors} {:floor 1 :task :proceed}]
-       [{:floor 1 :task :proceed} {:floor 2 :task :open-doors}]))
+       {1 :proceed} [1]
+       {2 :open-doors 1 :proceed} [1 2]))
 
 (deftest sorting-microtasks-descending
   (are [unsorted sorted] (= sorted (sort-microtasks :down unsorted))
        [] []
-       [{:floor 1 :task :proceed}] [{:floor 1 :task :proceed}]
-       [{:floor 1 :task :open-doors} {:floor 2 :task :proceed}]
-       [{:floor 2 :task :proceed} {:floor 1 :task :open-doors}]))
+       {1 :proceed} [1]
+       {1 :open-doors 2 :proceed} [2 1]))
+
+(deftest enqueueable-microtasks-ascending
+  (are [old new tasks] (= tasks (enqueueable-microtasks old new :up))
+       {} {} []
+       {4 :open-doors} {3 :proceed 4 :open-doors} [3]
+       {4 :open-doors} {3 :proceed 5 :open-doors 4 :open-doors} [3 5]))
+
+(deftest enqueueable-microtasks-descending
+  (are [old new tasks] (= tasks (enqueueable-microtasks old new :down))
+       {4 :open-doors} {3 :proceed 5 :open-doors 4 :open-doors} [5 3]))
 

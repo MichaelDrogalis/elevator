@@ -89,7 +89,10 @@
 (def directional-comparators {:up identity :down reverse})
 
 (defn sort-microtasks [direction tasks]
-  ((get directional-comparators direction) (sort-by :floor tasks)))
+  ((get directional-comparators direction) (sort (keys tasks))))
+
+(defn enqueueable-microtasks [old-tasks new-tasks direction]
+  (sort-microtasks direction (new-microtasks old-tasks new-tasks)))
 
 (defn submit-request [{:keys [floor location] :as request}]
   (dosync
