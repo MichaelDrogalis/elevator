@@ -84,3 +84,17 @@
        {} {1 :open-doors} {1 :open-doors}
        {1 :open-doors} {1 :open-doors 2 :proceed} {2 :proceed}))
 
+(deftest sorting-microtasks-ascending
+  (are [unsorted sorted] (= sorted (sort-microtasks :up unsorted))
+       [] []
+       [{:floor 1 :task :proceed}] [{:floor 1 :task :proceed}]
+       [{:floor 2 :task :open-doors} {:floor 1 :task :proceed}]
+       [{:floor 1 :task :proceed} {:floor 2 :task :open-doors}]))
+
+(deftest sorting-microtasks-descending
+  (are [unsorted sorted] (= sorted (sort-microtasks :down unsorted))
+       [] []
+       [{:floor 1 :task :proceed}] [{:floor 1 :task :proceed}]
+       [{:floor 1 :task :open-doors} {:floor 2 :task :proceed}]
+       [{:floor 2 :task :proceed} {:floor 1 :task :open-doors}]))
+

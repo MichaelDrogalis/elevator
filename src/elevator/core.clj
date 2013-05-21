@@ -86,6 +86,11 @@
 (defn new-microtasks [old-tasks new-tasks]
   (or (second (diff old-tasks new-tasks)) {}))
 
+(def directional-comparators {:up identity :down reverse})
+
+(defn sort-microtasks [direction tasks]
+  ((get directional-comparators direction) (sort-by :floor tasks)))
+
 (defn submit-request [{:keys [floor location] :as request}]
   (dosync
    (let [result (discretize? @elevator floor location)]
