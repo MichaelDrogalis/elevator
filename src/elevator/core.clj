@@ -15,16 +15,18 @@
 
 (def elevator-motion {:up inc :down dec})
 
-(defn move-elevator! [elevator-state]
-  (dosync (alter elevator-state update-in [:floor]
-                 (elevator-motion (:direction @elevator-state)))))
+(defn move-elevator! [elevator-state floor]
+  (dosync
+   (let [floor-fn (elevator-motion (:direction @elevator-state))]
+     (alter elevator-state update-in [:floor] floor-fn)
+     (alter microtasks dissoc floor))))
 
 (defmethod perform-task! :proceed
   [floor task]
   (println "---------------------")
   (println "Proceeding to floor" floor)
   (Thread/sleep 2000)
-  (move-elevator! elevator)
+  (move-elevator! elevator floor)
   (println "---------------------"))
 
 (defmethod perform-task! :open-doors
@@ -32,7 +34,7 @@
   (println "---------------------")
   (println "Preparing to stop on floor" floor)
   (Thread/sleep 3000)
-  (move-elevator! elevator)
+  (move-elevator! elevator floor)
   (println "---------------------"))
 
 (defn elevator-consumer [f]
