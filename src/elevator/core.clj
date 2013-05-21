@@ -8,6 +8,8 @@
 
 (def upstream-tasks (ref #{}))
 
+(def input-control (agent nil))
+
 (def microtask-queue (channel))
 
 (defmulti perform-task!
@@ -158,6 +160,4 @@
            (= :upstream result) (alter upstream-tasks conj request)
            (= :rejected result) (println "Request rejected.")
            :else (println "Unexpected result from discretize?:" result)))))
-
-(submit-request {:floor 7 :location :outside})
 
