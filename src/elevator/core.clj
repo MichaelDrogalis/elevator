@@ -8,8 +8,6 @@
 
 (def upstream-tasks (ref #{}))
 
-(def input-control (agent nil))
-
 (def microtask-queue (channel))
 
 (defmulti perform-task!
@@ -153,11 +151,28 @@
                  (enqueue microtask-queue
                           (fn [] {:floor floor :task (get @microtasks floor)}))))))
 
+(defmulti update-stream! (fn [stream _] stream))
+
+(defmethod update-stream! :downstream
+  [_ {:keys [floor]}]
+  (let [merged-tasks (merge-task-seq @microtasks (discretize @elevator floor))]
+    (ref-set microtasks merged-tasks)))
+
+(defmethod update-stream! :upstream
+  [_ request]
+  (alter upstream-tasks conj request))
+
+(defmethod update-stream! :rejected
+  [_ request]
+  (println "Request" request "rejected"))
+
+(defmethod update-stream! :else
+  [error request]
+  (println "Received error" error "from discretize? for request" request))
+
 (defn submit-request [{:keys [floor location] :as request}]
   (dosync
-   (let [result (discretize? @elevator (not (empty? @microtasks)) floor location)]
-     (cond (= :downstream result) (ref-set microtasks (merge-task-seq @microtasks (discretize @elevator floor)))
-           (= :upstream result) (alter upstream-tasks conj request)
-           (= :rejected result) (println "Request rejected.")
-           :else (println "Unexpected result from discretize?:" result)))))
+   (let [downstream-work? (not (empty? @microtasks))
+         result (discretize? @elevator downstream-work? floor location)]
+     (update-stream! result request))))
 
