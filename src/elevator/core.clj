@@ -1,11 +1,45 @@
 (ns elevator.core
-  (:require [clojure.data :refer [diff]]))
+  (:require [clojure.data :refer [diff]]
+            [lamina.core :refer [channel enqueue receive-all]]))
 
 (def elevator (ref {:floor 10 :direction :down}))
 
 (def microtasks (ref {}))
 
 (def upstream-tasks (ref #{}))
+
+(def microtask-queue (channel))
+
+(defmulti perform-task!
+  (fn [_ task] task))
+
+(def elevator-motion {:up inc :down dec})
+
+(defn move-elevator! [elevator-state]
+  (dosync (alter elevator-state update-in [:floor]
+                 (elevator-motion (:direction @elevator-state)))))
+
+(defmethod perform-task! :proceed
+  [floor task]
+  (println "---------------------")
+  (println "Proceeding to floor" floor)
+  (Thread/sleep 2000)
+  (move-elevator! elevator)
+  (println "---------------------"))
+
+(defmethod perform-task! :open-doors
+  [floor task]
+  (println "---------------------")
+  (println "Preparing to stop on floor" floor)
+  (Thread/sleep 3000)
+  (move-elevator! elevator)
+  (println "---------------------"))
+
+(defn elevator-consumer [f]
+  (let [{:keys [floor task]} (f)]
+    (perform-task! floor task)))
+
+(receive-all microtask-queue elevator-consumer)
 
 (defmulti downstream?
   (fn [direction _ _] direction))
@@ -81,7 +115,7 @@
 
 (add-watch microtasks :upstream-consumer
            (fn [_ microtasks-ref _ microtask-coll]
-             (consume-upstream-tasks elevator microtask-coll upstream-tasks)))
+             (consume-upstream-tasks elevator microtasks-ref microtask-coll upstream-tasks)))
 
 (defn new-microtasks [old-tasks new-tasks]
   (or (second (diff old-tasks new-tasks)) {}))
@@ -93,6 +127,13 @@
 
 (defn enqueueable-microtasks [old-tasks new-tasks direction]
   (sort-microtasks direction (new-microtasks old-tasks new-tasks)))
+
+(add-watch microtasks :enqueuer
+           (fn [_ _ old-tasks new-tasks]
+             (let [tasks (enqueueable-microtasks old-tasks new-tasks (:direction @elevator))]
+               (doseq [floor tasks]
+                 (enqueue microtask-queue
+                          (fn [] {:floor floor :task (get @microtasks floor)}))))))
 
 (defn submit-request [{:keys [floor location] :as request}]
   (dosync
